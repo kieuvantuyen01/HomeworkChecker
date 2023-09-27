@@ -39,12 +39,17 @@ def start_process():
             student_names.append(line.strip())
 
     missing_students = []
+    submitted_students = []
     for folder_name in os.listdir(folder_path):
         if os.path.isdir(os.path.join(folder_path, folder_name)):
             full_name = folder_name.split("_")[0]
-            if full_name not in student_names:
-                missing_students.append(full_name)
+            # if full_name exists in student_names, this student submitted the homework
+            submitted_students.append(full_name)
 
+    for student_name in student_names:
+        if student_name not in submitted_students:
+            missing_students.append(student_name)
+    
     if missing_students:
         messagebox.showinfo("Missing Students", "The following students did not submit the homework:\n" + "\n".join(missing_students))
         write_to_excel(missing_students)
