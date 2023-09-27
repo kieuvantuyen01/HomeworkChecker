@@ -69,6 +69,12 @@ def write_to_excel(missing_students):
 
     workbook.save(filename)
     messagebox.showinfo("Excel File Created", "The list of missing students has been saved to " + filename)
+    return filename
+
+def open_excel_file():
+    filename = filedialog.askopenfilename(initialdir="D:/THCS Luat", filetypes=[("Excel Files", "*.xlsx")])
+    if filename:
+        os.startfile(filename)
 
 # Create the Tkinter window
 window = tk.Tk()
@@ -94,6 +100,10 @@ file_button.pack()
 # Create the start button
 start_button = tk.Button(window, text="Start", command=start_process)
 start_button.pack()
+
+# Create the open Excel file button
+open_button = tk.Button(window, text="Open Excel File", command=open_excel_file)
+open_button.pack()
 
 # Run the Tkinter event loop
 window.mainloop()
