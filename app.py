@@ -6,13 +6,15 @@
 # Program displays the student's name who did not submit the homework in the text box.
 
 import os
+import tempfile
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from datetime import datetime
+import zipfile
 import openpyxl
 
 def select_folder():
-    folder_path = filedialog.askdirectory(initialdir="C:/Users/tuyen/OneDrive/Documents")
+    folder_path = filedialog.askopenfilename(initialdir="C:/Users/tuyen/OneDrive/Documents", filetypes=[("Zip Files", "*.zip")])
     folder_entry.delete(0, tk.END)
     folder_entry.insert(0, folder_path)
 
@@ -26,7 +28,7 @@ def start_process():
     file_path = file_entry.get()
 
     if not folder_path or not file_path:
-        messagebox.showerror("Error", "Please select a folder and a file.")
+        messagebox.showerror("Error", "Please select a zip file and a text file.")
         return
 
     if not os.path.exists(file_path):
@@ -40,11 +42,21 @@ def start_process():
 
     missing_students = []
     submitted_students = []
-    for folder_name in os.listdir(folder_path):
-        if os.path.isdir(os.path.join(folder_path, folder_name)):
-            full_name = folder_name.split("_")[0]
-            # if full_name exists in student_names, this student submitted the homework
-            submitted_students.append(full_name)
+    if zipfile.is_zipfile(folder_path):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with zipfile.ZipFile(folder_path, "r") as zip_file:
+                zip_file.extractall(temp_dir)
+            for folder_name in os.listdir(temp_dir):
+                if os.path.isdir(os.path.join(temp_dir, folder_name)):
+                    full_name = folder_name.split("_")[0]
+                    # if full_name exists in student_names, this student submitted the homework
+                    submitted_students.append(full_name)
+    else:
+        for folder_name in os.listdir(folder_path):
+            if os.path.isdir(os.path.join(folder_path, folder_name)):
+                full_name = folder_name.split("_")[0]
+                # if full_name exists in student_names, this student submitted the homework
+                submitted_students.append(full_name)
 
     for student_name in student_names:
         if student_name not in submitted_students:
@@ -82,11 +94,11 @@ window.title("Homework Checker")
 window.geometry("400x250")
 
 # Create the folder selection button and entry
-folder_label = tk.Label(window, text="Select the folder with homework submissions:")
+folder_label = tk.Label(window, text="Select the Zip file with homework submissions:")
 folder_label.pack()
 folder_entry = tk.Entry(window)
 folder_entry.pack()
-folder_button = tk.Button(window, text="Select Folder", command=select_folder)
+folder_button = tk.Button(window, text="Select Zip file", command=select_folder)
 folder_button.pack()
 
 # Create the file selection button and entry
